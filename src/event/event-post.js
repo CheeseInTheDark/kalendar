@@ -1,5 +1,6 @@
 const fs = require('fs')
 const path = require('path')
+const settings = require('../settings')
 
 module.exports = function postEvent(req, res) {
     const dateDir = path.join(settings.get().dataDirectory, req.params.date)

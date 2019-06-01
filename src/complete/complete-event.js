@@ -1,5 +1,6 @@
 const eventIdToPath = require('../event/event-id-to-path')
 const fs = require('fs')
+const eventIdToEvent = require('../event/event-id-to-event')
 
 module.exports = function completeEvent(req, res) {
     const event = eventIdToEvent(req.params.eventId)
