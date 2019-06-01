@@ -112,13 +112,6 @@ function validateDateExists(req, res, next) {
     }
 }
 
-function doc(docString) {
-    return (req, res) => { 
-        res.setHeader("Content-Type", "text/plain")
-        res.status(200).send(docString) 
-    }
-}
-
 const dateDoc = require('./date/date-doc')
 const eventDoc = require('./event/event-doc')
 const completeDoc = require('./complete/complete-doc')
