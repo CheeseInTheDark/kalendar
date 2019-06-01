@@ -19,28 +19,6 @@ if (settingsFilePath === undefined) {
 const settings = require('./settings')
 settings.useFile(settingsFilePath)
 
-function deleteDate(req, res) {
-    const dateDir = path.join(settings.get().dataDirectory, req.params.date)
-
-    rmdirForce.sync(dateDir)
-
-    res.status(200).send()
-}
-
-function postEvent(req, res) {
-    const dateDir = path.join(settings.get().dataDirectory, req.params.date)
-    fs.existsSync(dateDir) || fs.mkdirSync(dateDir)
-
-    const nextId = Math.max(fs.readdirSync(dateDir).map(parseInt)) + 1
-
-    const eventFile = path.join(dateDir, `${nextId}`)
-    fs.writeFileSync(eventFile, JSON.stringify({
-        eventNote: req.body.eventNote,
-        completed: false
-    }))
-    res.status(200).send(`${req.params.date}${nextId}`)
-}
-
 function deleteEvent(req, res) {
     fs.unlinkSync(eventIdToPath(req.params.eventId))
 
@@ -83,14 +61,6 @@ function validateEventId(req, res, next) {
     }
 }
 
-function validateDate(req, res, next) {
-    if (!moment(req.params.date, "YYYYMMDD").isValid()) {
-        res.status(400).send("date must be a string with format YYYYMMDD")
-    } else {
-        next()
-    }
-}
-
 function validateDateExists(req, res, next) {
     const dateDir = path.join(settings.get().dataDirectory, `${req.params.date}`)
     if (!fs.existsSync(dateDir)) {
@@ -106,10 +76,13 @@ const completeDoc = require('./complete/complete-doc')
 const rootDoc = require('./root-doc')
 
 const completeEvent = require('./complete/complete-event')
-const getDate = require('./date/date-get')
-const getDateRange = require('./date/date-get-range')
+const postEvent = require('./event/event-post')
 
+const getDate = require('./date/date-get')
+const deleteDate = require('./date/date-delete')
+const getDateRange = require('./date/date-get-range')
 const validateDateRange = require('./date/validate-date-range')
+const validateDate = require('./date/validate-date')
 
 app.all('/date', dateDoc)
 app.get('/date/:start-:end', validateDateRange, getDateRange)
