@@ -19,18 +19,6 @@ if (settingsFilePath === undefined) {
 const settings = require('./settings')
 settings.useFile(settingsFilePath)
 
-function getDateRange(req, res) {
-    const start = moment(req.params.start, "YYYYMMDD")
-    const end = moment(req.params.end, "YYYYMMDD")
-    const eventsForAllDates = []
-
-    for (let date = moment(start); date.isSameOrBefore(end); date.add(1, "days")) {
-        eventsForAllDates.push(getDateInternal(date.format("YYYYMMDD")))
-    }
-
-    res.status(200).send(eventsForAllDates)
-}
-
 function validateDateRange(req, res, next) {
     const start = moment(req.params.start, "YYYYMMDD")
     const end = moment(req.params.end, "YYYYMMDD")
@@ -155,6 +143,7 @@ const completeDoc = require('./complete/complete-doc')
 const rootDoc = require('./root-doc')
 
 const completeEvent = require('./complete/complete-event')
+const getDateRange = require('./date/date-get-range')
 
 app.all('/date', dateDoc)
 app.get('/date/:start-:end', validateDateRange, getDateRange)
