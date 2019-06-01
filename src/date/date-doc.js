@@ -1,4 +1,6 @@
-module.exports = 
+const doc = require('../doc')
+
+const docString = 
 `/date endpoints:
 
 /date/(date)
@@ -34,3 +36,5 @@ GET: retrieve the events for the given date range, inclusive of start and end da
     }, ... ],
     "date": the date string for this grouping of events in YYYYMMDD
 }, ... ]`
+
+module.exports = doc(docString)

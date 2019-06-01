@@ -1,5 +1,6 @@
-module.exports = 
+const doc = require('../doc')
 
+const docString = 
 `/event endpoints:
 
 /event/(eventId)
@@ -28,3 +29,5 @@ POST: create a new event on the given date, request body must contain json in th
 }
 
 the reponse contains the id of the new event as text`
+
+module.exports = doc(docString)

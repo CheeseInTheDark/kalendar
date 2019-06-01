@@ -4,6 +4,7 @@ const fs = require("fs")
 const path = require("path")
 const rmdirForce = require("rimraf")
 const moment = require("moment")
+const eventIdToPath = require('./event/event-id-to-path')
 
 const app = express()
 const port = 3000
@@ -15,18 +16,8 @@ if (settingsFilePath === undefined) {
     process.exit()
 }
 
-const settings = JSON.parse(fs.readFileSync(settingsFilePath))
-
-function completeEvent(req, res) {
-    const event = eventIdToEvent(req.params.eventId)
-
-    fs.writeFileSync(eventIdToPath(req.params.eventId), JSON.stringify({
-        eventNote: event.eventNote,
-        completed: true
-    }))
-
-    res.status(200).send()
-}
+const settings = require('./settings')
+settings.useFile(settingsFilePath)
 
 function getDateRange(req, res) {
     const start = moment(req.params.start, "YYYYMMDD")
@@ -58,7 +49,7 @@ function getDate(req, res) {
 }
 
 function getDateInternal(date) {
-    const dateDir = path.join(settings.dataDirectory, date)
+    const dateDir = path.join(settings.get().dataDirectory, date)
 
     if (fs.existsSync(dateDir)) {
         const eventIds = fs.readdirSync(dateDir).map(fileName => date + fileName)
@@ -71,7 +62,7 @@ function getDateInternal(date) {
 }
 
 function deleteDate(req, res) {
-    const dateDir = path.join(settings.dataDirectory, req.params.date)
+    const dateDir = path.join(settings.get().dataDirectory, req.params.date)
 
     rmdirForce.sync(dateDir)
 
@@ -79,7 +70,7 @@ function deleteDate(req, res) {
 }
 
 function postEvent(req, res) {
-    const dateDir = path.join(settings.dataDirectory, req.params.date)
+    const dateDir = path.join(settings.get().dataDirectory, req.params.date)
     fs.existsSync(dateDir) || fs.mkdirSync(dateDir)
 
     const nextId = Math.max(fs.readdirSync(dateDir).map(parseInt)) + 1
@@ -116,12 +107,6 @@ function eventIdToEvent(eventId) {
     }
 }
 
-function eventIdToPath(eventId) {
-    const dateDirName = eventId.substr(0, 8)
-    const dateDir = path.join(settings.dataDirectory, dateDirName)
-    return path.join(dateDir, eventId.substr(8))
-}
-
 function validateEventExists(req, res, next) {
     const eventPath = eventIdToPath(req.params.eventId)
 
@@ -149,7 +134,7 @@ function validateDate(req, res, next) {
 }
 
 function validateDateExists(req, res, next) {
-    const dateDir = path.join(settings.dataDirectory, `${req.params.date}`)
+    const dateDir = path.join(settings.get().dataDirectory, `${req.params.date}`)
     if (!fs.existsSync(dateDir)) {
         res.status(404).send()
     } else {
@@ -164,19 +149,26 @@ function doc(docString) {
     }
 }
 
-app.all('/date', doc(require('./date-doc')))
+const dateDoc = require('./date/date-doc')
+const eventDoc = require('./event/event-doc')
+const completeDoc = require('./complete/complete-doc')
+const rootDoc = require('./root-doc')
+
+const completeEvent = require('./complete/complete-event')
+
+app.all('/date', dateDoc)
 app.get('/date/:start-:end', validateDateRange, getDateRange)
 app.get('/date/:date', validateDate, getDate)
 app.delete('/date/:date', validateDate, validateDateExists, deleteDate)
 
-app.all('/event', doc(require('./event-doc')))
+app.all('/event/', eventDoc)
 app.get('/event/:eventId', validateEventId, validateEventExists, getEvent)
 app.delete('/event/:eventId', validateEventId, validateEventExists, deleteEvent)
 app.post('/event/:date', validateDate, express.json(), postEvent)
 
-app.all('/complete', doc(require('./complete-doc')))
+app.all('/complete', completeDoc)
 app.put('/complete/:eventId', validateEventId, validateEventExists, completeEvent)
 
-app.all('/', doc(require('./app-doc')))
+app.all('/', rootDoc)
 
 app.listen(port, () => console.log('Yo dwag listening yo'))
