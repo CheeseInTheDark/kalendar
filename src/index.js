@@ -19,18 +19,6 @@ if (settingsFilePath === undefined) {
 const settings = require('./settings')
 settings.useFile(settingsFilePath)
 
-function validateDateRange(req, res, next) {
-    const start = moment(req.params.start, "YYYYMMDD")
-    const end = moment(req.params.end, "YYYYMMDD")
-    if (!start.isValid() || !end.isValid()) {
-        res.status(400).send("start and end dates must be of format YYYYMMDD")
-    } else if(start.isAfter(end)) {
-        res.status(400).send("start date must not be after end date")
-    } else {
-        next()
-    }
-}
-
 function deleteDate(req, res) {
     const dateDir = path.join(settings.get().dataDirectory, req.params.date)
 
@@ -120,6 +108,8 @@ const rootDoc = require('./root-doc')
 const completeEvent = require('./complete/complete-event')
 const getDate = require('./date/date-get')
 const getDateRange = require('./date/date-get-range')
+
+const validateDateRange = require('./date/validate-date-range')
 
 app.all('/date', dateDoc)
 app.get('/date/:start-:end', validateDateRange, getDateRange)
