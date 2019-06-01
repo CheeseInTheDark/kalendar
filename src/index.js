@@ -31,24 +31,6 @@ function validateDateRange(req, res, next) {
     }
 }
 
-function getDate(req, res) {
-    const events = getDateInternal(req.params.date)
-    res.status(200).send(events)
-}
-
-function getDateInternal(date) {
-    const dateDir = path.join(settings.get().dataDirectory, date)
-
-    if (fs.existsSync(dateDir)) {
-        const eventIds = fs.readdirSync(dateDir).map(fileName => date + fileName)
-        const eventsForDate = eventIds.map(eventIdToEvent)
-
-        return { date, events: eventsForDate }
-    } else {
-        return { date, events: [] }
-    }
-}
-
 function deleteDate(req, res) {
     const dateDir = path.join(settings.get().dataDirectory, req.params.date)
 
@@ -143,6 +125,7 @@ const completeDoc = require('./complete/complete-doc')
 const rootDoc = require('./root-doc')
 
 const completeEvent = require('./complete/complete-event')
+const getDate = require('./date/date-get')
 const getDateRange = require('./date/date-get-range')
 
 app.all('/date', dateDoc)
