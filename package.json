@@ -12,7 +12,7 @@
   "author": "acheeseinthedark@gmail.com",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.17.1",
+    "express": "^4.18.2",
     "moment": "^2.24.0",
     "pad-number": "0.0.4",
     "rimraf": "^2.6.3"
